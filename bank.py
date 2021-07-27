@@ -26,14 +26,13 @@ class Bank:
     def accounts(cls):
         return cls._requisition().json().get('accounts', [])
 
-
     @classmethod
     def _transactions(cls):
         return {i:cls.get(cls.url.get('transactions').format(i)).json().get('transactions', {}) for i in cls.accounts()}
 
     @classmethod
     def _merge(cls,transaction:dict,  transaction_type:str, account_id:id):
-        return transaction | {'transaction_type':transaction_type, 'account_id': account_id}
+        return {**transaction, **{'transaction_type':transaction_type, 'account_id': account_id}}
 
     @classmethod
     def nested_transactions(cls):
