@@ -3,6 +3,37 @@ import requests
 from itertools import chain
 
 
+class TidyTransaction:
+    
+    @classmethod
+    def tidy_account_iban(cls, transaction:dict, key:str, iban_key:str='iban') -> dict:
+        if key in transaction:
+            if isinstance(transaction[key], dict):
+                iban = transaction[key].get(iban_key)
+                transaction[key] = iban
+        return transaction
+    
+    @classmethod
+    def tidy_transaction_amount(cls, transaction:dict) -> dict:
+        if 'transactionAmount' in transaction:
+            if isinstance(transaction['transactionAmount'], dict):
+                amount = transaction['transactionAmount'].get('amount')
+                currency = transaction['transactionAmount'].get('currency')
+                transaction['transactionAmount'] = amount
+                transaction['transactionCurrency'] = currency
+        return transaction
+                
+
+    @classmethod
+    def tidy(cls, transaction:dict) -> dict:
+        for i in ['debtorAccount', 'creditorAccount']:
+            transaction = cls.tidy_account_iban(transaction, i)
+        transaction = cls.tidy_transaction_amount(transaction)
+        return transaction
+    
+   
+
+
 class Bank:
 
     url = {
@@ -32,7 +63,7 @@ class Bank:
 
     @classmethod
     def _merge(cls,transaction:dict,  transaction_type:str, account_id:id):
-        return {**transaction, **{'transaction_type':transaction_type, 'account_id': account_id}}
+        return {**transaction, **{'transactionType':transaction_type, 'accountId': account_id}}
 
     @classmethod
     def nested_transactions(cls):
@@ -42,4 +73,6 @@ class Bank:
     def flat_transactions(cls):
         return list(chain(*chain(*cls.nested_transactions())))
 
-
+    @classmethod
+    def transactions(cls):
+        return list(map(TidyTransaction.tidy, cls.flat_transactions()))
