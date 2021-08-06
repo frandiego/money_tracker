@@ -28,13 +28,17 @@ class Constants:
     transactionType = 'transactionType'
     accountId = 'accountId'
     valueDate = 'valueDate'
-
-    transaction_keys = [accountId, 'transactionId', 'mandateId',
-                        'bookingDate', valueDate, 'remittanceInformationUnstructured',
+    
+    transactionId = 'transactionId'
+    bookingDate = 'bookingDate'
+    createdAt = 'createdAt'
+    
+    transaction_keys = [accountId, transactionId, 'mandateId',
+                        bookingDate, valueDate, 'remittanceInformationUnstructured',
                         transactionType, transactionAmount, transactionCurrency, 'balance',
                         creditorAccount, 'creditorName', 'ultimateCreditor',
                         debtorAccount, 'debtorName', 'ultimateDebtor',
-                        'bankTransactionCode', 'apiName', 'createdAt']
+                        'bankTransactionCode', 'apiName', createdAt]
 
     environment_variables = SimpleNamespace(**{i: i for i in ['REQUISITION', 'TOKEN']})
 
