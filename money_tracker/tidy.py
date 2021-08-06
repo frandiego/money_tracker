@@ -32,6 +32,5 @@ class TidyTransaction:
             transaction = cls.tidy_account_iban(transaction, i)
         transaction = cls.tidy_transaction_amount(transaction)
         transaction = cls.merge(transaction, {C.apiName: C.nordigen})
-        transaction = cls.merge(transaction, {C.createdAt: str(datetime.datetime.utcnow())})
         transaction = {i: transaction.get(i) for i in C.transaction_keys}
         return transaction

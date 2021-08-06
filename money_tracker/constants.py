@@ -5,12 +5,14 @@ import os
 class Constants:
     path_data = './data'
     filename_transactions = os.path.join(path_data, 'transactions.fth')
+    filename_balances = os.path.join(path_data, 'balances.fth')
 
     requisition = 'requisition'
     requisitions = 'requisitions'
     transactions = 'transactions'
     balances = 'balances'
-
+    details = 'details'
+    account = 'account'
     accounts = 'accounts'
     amount = 'amount'
     currency = 'currency'
@@ -24,7 +26,6 @@ class Constants:
 
     creditorAccount = 'creditorAccount'
     apiName = 'apiName'
-    createdAt = 'createdAt'
 
     transactionType = 'transactionType'
     accountId = 'accountId'
@@ -32,7 +33,6 @@ class Constants:
     
     transactionId = 'transactionId'
     bookingDate = 'bookingDate'
-    createdAt = 'createdAt'
 
     mandateId = 'mandateId'
     remittanceInformationUnstructured = 'remittanceInformationUnstructured'
@@ -46,14 +46,23 @@ class Constants:
     bankTransactionCode = 'bankTransactionCode'
     apiName = 'apiName'
 
-
+    balanceAmount = 'balanceAmount'
+    balanceType = 'balanceType'
+    closingBooked = 'closingBooked'
+    amount = 'amount'
+    dateStamp = 'dateStamp'
+    resourceId = 'resourceId'
     
     transaction_keys = [accountId, transactionId, mandateId,
                         bookingDate, valueDate, remittanceInformationUnstructured,
                         transactionType, transactionAmount, transactionCurrency, balance,
                         creditorAccount, creditorName, ultimateCreditor,
                         debtorAccount, debtorName, ultimateDebtor,
-                        bankTransactionCode, apiName, createdAt]
+                        bankTransactionCode, apiName]
+
+    cash_keys = [accountId, transactionId, bookingDate, remittanceInformationUnstructured, 
+                 transactionAmount, transactionCurrency, creditorAccount, creditorName, 
+                 debtorAccount, debtorName]
 
     environment_variables = SimpleNamespace(**{i: i for i in ['REQUISITION', 'TOKEN']})
     
@@ -61,5 +70,6 @@ class Constants:
     url = SimpleNamespace(**{
         requisitions: base_url + '/requisitions/{}/',
         transactions: base_url + '/accounts/{}/transactions/',
-        balances : base_url + '/accounts/{}/balances/'
+        balances : base_url + '/accounts/{}/balances/', 
+        details : base_url + '/accounts/{}/details/', 
     })

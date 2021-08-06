@@ -33,6 +33,10 @@ class Bank:
         return {i: cls.get(C.url.balances.format(i)).json().get(C.balances, {}) for i in cls.accounts()}
 
     @classmethod
+    def _details(cls):
+        return {i: cls.get(C.url.details.format(i)).json().get(C.account, {}) for i in cls.accounts()}
+
+    @classmethod
     def _merge(cls, transaction: dict, transaction_type: str, account_id: id):
         return {**transaction, **{C.transactionType: transaction_type, C.accountId: account_id}}
 
