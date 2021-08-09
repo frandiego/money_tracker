@@ -3,7 +3,7 @@ import pandas as pd
 from .bank import Bank
 import numpy as np
 import os
-import datetime
+from datetime import datetime
 
 class Data:
 
@@ -19,7 +19,6 @@ class Data:
             df[i] = df[i].astype(str).fillna('')
         return df
 
-   
     @classmethod
     def tidy_transactions(cls, df:pd.DataFrame()):
         df = cls.coerce_columns(df=df, columns=C.transaction_keys, fill='')
@@ -29,54 +28,68 @@ class Data:
         return df
 
     @classmethod
-    def read_bank_transactions(cls):
-        request = Bank.transactions()
-        safe =  request if request else []
-        return cls.tidy_transactions(pd.DataFrame.from_records(safe))
+    def feather_path(cls, filename:str) -> str:
+        return os.path.join(C.path_data, filename + C.feather_extension)
 
     @classmethod
     def read_feather(cls, filename:str) -> pd.DataFrame:
-        if os.path.exists(filename):
-            return cls.tidy_transactions(pd.read_feather(filename))
+        path = cls.feather_path(filename)
+        if os.path.exists(path):
+            return pd.read_feather(path)
         return pd.DataFrame()
-
-    @classmethod
-    def read_saved_transactions(cls) -> pd.DataFrame:
-        return cls.tidy_transactions(cls.read_feather(C.filename_transactions))
     
     @classmethod
-    def read_transactions(cls):
-        df = pd.concat([cls.read_saved_transactions(), cls.read_bank_transactions()])
-        return cls.tidy_transactions(df)
+    def save_feather(cls, df:pd.DataFrame, filename:str):
+        path = cls.feather_path(filename)
+        df = cls.columns_to_string(df).drop_duplicates().reset_index(drop=True)
+        df.to_feather(path)
 
     @classmethod
-    def transactions(cls) -> pd.DataFrame:
-        df = cls.read_transactions()
-        df.to_feather(C.filename_transactions)
-        return df
+    def update_feather(cls, df:pd.DataFrame, filename:str, output:bool=True) -> pd.DataFrame:
+        df = pd.concat([df, cls.read_feather(filename)])
+        cls.save_feather(df, filename)
+        if output:
+            return df
+
+    @classmethod
+    def shoud_call_api(cls, filename:str) -> dict:
+        path = cls.feather_path(filename)
+        if os.path.exists(path):
+            last_creation = datetime.fromtimestamp(os.path.getmtime(path))
+            return (datetime.now() - last_creation).total_seconds() / 60**2>1
+
+    @classmethod
+    def transactions(cls):
+        if cls.shoud_call_api(C.transactions):
+            request = Bank.transactions()
+            safe =  request if request else []
+            df =  cls.tidy_transactions(pd.DataFrame.from_records(safe))
+            return cls.tidy_transactions(cls.update_feather(df, C.transactions))
+        return cls.tidy_transactions(cls.read_feather(C.transactions))
+
 
     @classmethod
     def balance_amount(cls, balance:dict) -> float:
         return float([i.get(C.balanceAmount) for i in balance if i.get(C.balanceType) == C.closingBooked][0].get(C.amount))
 
     @classmethod
-    def balances(cls) -> dict:
+    def get_balances(cls) -> pd.DataFrame:
         balances = Bank._balances()
         details = Bank._details()
-        
         balances_dict =  {k: cls.balance_amount(v) for k, v in balances.items()}
         details_dict = {k:v.get(C.resourceId) for k, v in details.items()}
-
         df =  pd.DataFrame(balances_dict.keys(), columns=[C.accountId])
         df[C.iban] = df[C.accountId].map(details_dict)
         df[C.balance] = df[C.accountId].map(balances_dict)
-        df[C.dateStamp] = str(datetime.datetime.utcnow().date())
-        df = pd.concat([cls.read_feather(C.filename_balances), df])
-        df = df.drop_duplicates(keep='last')
-        df = cls.columns_to_string(df).drop_duplicates().reset_index(drop=True)
-        df.to_feather(C.filename_balances)
+        df[C.dateStamp] = str(datetime.utcnow().date())
         return df
         
+    @classmethod
+    def balances(cls):
+        if cls.shoud_call_api(C.balances):
+            df = cls.get_balances()
+            return cls.update_feather(df, C.balances)
+        return cls.read_feather(C.balances)
 
 
 

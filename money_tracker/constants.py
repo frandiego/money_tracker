@@ -4,9 +4,9 @@ import os
 
 class Constants:
     path_data = './data'
-    filename_transactions = os.path.join(path_data, 'transactions.fth')
-    filename_balances = os.path.join(path_data, 'balances.fth')
-
+    transactions = 'transactions'
+    balances = 'balances'
+    feather_extension = '.fth'
     requisition = 'requisition'
     requisitions = 'requisitions'
     transactions = 'transactions'
@@ -60,9 +60,10 @@ class Constants:
                         debtorAccount, debtorName, ultimateDebtor,
                         bankTransactionCode, apiName]
 
-    cash_keys = [accountId, transactionId, bookingDate, remittanceInformationUnstructured, 
+    cash_keys = [accountId, transactionId, bookingDate, valueDate,  remittanceInformationUnstructured, 
                  transactionAmount, transactionCurrency, creditorAccount, creditorName, 
                  debtorAccount, debtorName]
+    
 
     environment_variables = SimpleNamespace(**{i: i for i in ['REQUISITION', 'TOKEN']})
     
